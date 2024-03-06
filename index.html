@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="output.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=League+Spartan:wght@100..900&family=Red+Hat+Text:ital,wght@0,300..700;1,300..700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: "Josefin Sans", sans-serif;
+        }
+
+        input:focus {
+            outline-width: 0;
+        }
+    </style>
+    <title>Frontend Mentor | Todo app</title>
+</head>
+
+<body class="bg-white dark:bg-[#161722]">
+    <main id="app">
+        <div class="relative">
+            <img v-if="!darkMode" class="w-screen h-60 md:h-full" src="images/bg-desktop-light.jpg" alt="">
+            <img v-else class="w-screen h-60 md:h-full" src="images/bg-desktop-dark.jpg" alt="">
+        </div>
+        <div class="absolute flex justify-between top-10 md:justify-around md:top-24 md:px-16 md:w-screen md:px-96">
+            <span class="tracking-[0.3em] text-2xl pl-5 pr-20 font-semibold text-white md:text-5xl md:pl-0 md:pr-0">TODO</span>
+            <button class="pl-36 pr-5" @click="toggleDarkMode()">
+                <img v-if="!darkMode" class="min-w-5 align-center my-auto md:w-8" src="images/icon-moon.svg" alt="">
+                <img v-else class="min-w-5 md:w-8 align-center my-auto" src="images/icon-sun.svg" alt="">
+            </button>
+        </div>
+        <div class="absolute top-[15%] px-5 w-screen grid grid-cols-1 justify-items-center md:top-60 md:px-[38rem]">
+            <div class="w-full relative">
+                <input @keyup.enter="addToDoList" v-model="newActivity.text" id="inputTodo"
+                    class="py-5 rounded w-full bg-white text-xl px-16 text-gray-700 dark:bg-[#25273c] dark:text-[#cacde8] "
+                    type="text">
+
+                <div class="absolute top-5 ml-4 border border-1 p-3 rounded-full dark:border-gray-500">
+                </div>
+                <div class="mt-5 md:mt-12"></div>
+                <div id="tempatTodo" v-for="(item, index) in toDoList" class="cursor-pointer" :draggable="true"
+                    @dragstart="dragStart($event, index)" @dragover.prevent @drop="drop($event, index)">
+                    <div class="flex" v-if="!item.hidden">
+                        <!-- :class="[(index >= 1 ? 'mt-[0.1%]' : 'mt-14 ')]"  -->
+                        <div class="w-1/12 ">
+                            <div
+                                class="bg-white h-[100%] rounded-l-xl border-b-[0.1rem] border-gray dark:bg-[#25273c]">
+                                <button @click="selesai(index)">
+                                    <div
+                                        class="absolute ml-4 px-[0.8rem] py-[0.85rem] rounded-full bg-gradient-to-b from-[#57ddff] to-[#c058f3]">
+                                        <img class="" src="images/icon-check.svg" alt="">
+                                    </div>
+                                    <div :class="{ 'hidden': item.done }"
+                                        class="absolute border bg-white ml-[0.94rem] px-[0.8rem] py-[0.85rem] rounded-full hover:px-[0.7rem] hover:py-[0.73rem] hover:ml-[2.6%] hover:mt-[2px] hover:border-none dark:bg-[#25273c] dark:border-gray-100">
+                                        <img class="hover:hidden dark:hidden" src="images/icon-check.svg" alt="">
+                                        <img class="hidden dark:block" src="images/icon-check-dark.svg" alt="">
+                                    </div>
+
+
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-11/12 ">
+                            <p id="textTodo"
+                                class="py-5 px-10 bg-white rounded-r-xl w-full border-b-[0.1rem] border-gray text-xl md:px-4 dark:bg-[#25273c] dark:text-[#cacde8] dark:hover:text-[#e4e5f1]"
+                                :class="{
+                                    'line-through text-gray-500 dark:text-gray-600': item.done
+                                }">
+                                {{ item . text }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="toDoList != ''"
+                    class="flex justify-between px-4 pt-3 pb-3 border-b-[0.1rem] rounded-b-xl text-sm">
+                    <p class="text-gray-500">{{ toDoList . length }} items left</p>
+                    <div class="flex justify-between md:w-[25%]">
+                        <button @click="all()" class="text-[#3a7bfd] font-bold">All</button>
+                        <button @click="active()" class="text-gray-500 font-bold dark:hover:text-[#e4e5f1]">Active</button>
+                        <button @click="completed()" class="text-gray-500 font-bold dark:hover:text-[#e4e5f1]">Completed</button>
+                    </div>
+                    <button @click="hapus()" class="text-gray-500 dark:hover:text-[#e4e5f1]">Clear Completed</button>
+                </div>
+            </div>
+            <!-- <div class="attribution mt-10 text-black dark:text-white">
+                Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>.
+                Coded by <a href="https://www.frontendmentor.io/profile/azka5123">Azka</a>.
+            </div> -->
+            <p class="text-sm text-gray-500 mt-10">Drag and drop to reorder list</p>
+        </div>
+        
+    </main>
+    <!-- <div class="gradient-border"></div> -->
+    <script type="module">
+        import {
+            createApp
+        } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+
+        createApp({
+            data() {
+                return {
+                    toDoList: [
+                        //     {
+                        //     text: "asd",
+                        //     done: false,
+                        //     hidden: false
+                        // }
+                    ],
+                    newActivity: {
+                        text: '',
+                        done: false,
+                        hidden: false,
+                    },
+                    darkMode: false
+                };
+            },
+            methods: {
+                addToDoList() {
+                    if (this.newActivity.text.trim() === '') {
+                        return;
+                    }
+                    this.toDoList.push({
+                        ...this.newActivity
+                    });
+                    console.log(this.toDoList);
+                    this.newActivity.text = '';
+                },
+                hapus(index) {
+                    this.toDoList = this.toDoList.filter(item => !item.done);
+                    this.toDoList.forEach(item => item.hidden = false);
+
+                },
+                selesai(index) {
+                    this.toDoList[index].done = !this.toDoList[index].done;
+                },
+                all() {
+                    this.toDoList.forEach(item => item.hidden = false);
+                },
+                active() {
+                    this.toDoList.forEach(item => item.hidden = item.done);
+                },
+                completed() {
+                    this.toDoList.forEach(item => item.hidden = !item.done);
+
+                },
+                dragStart(event, index) {
+                    event.dataTransfer.setData("index", index);
+                },
+                drop(event, newIndex) {
+                    event.preventDefault();
+                    const oldIndex = event.dataTransfer.getData("index");
+                    const movedItem = this.toDoList.splice(oldIndex, 1)[0];
+                    this.toDoList.splice(newIndex, 0, movedItem);
+                },
+                toggleDarkMode() {
+                    // Toggle dark mode
+                    this.darkMode = !this.darkMode;
+
+                    if (this.darkMode) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove(
+                            'dark');
+                    }
+
+                }
+
+            },
+        }).mount('#app');
+    </script>
+
+</body>
+
+</html>
